@@ -40,13 +40,17 @@ pipeline {
 
         stage('Push to AWS ECR') {
             steps {
-                script {
+		withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                          credentialsId: 'aws-creds', 
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {	
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | \
                         docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         docker tag sample-spring-boot-app:latest 098072157119.dkr.ecr.ap-south-1.amazonaws.com/sample-spring-boot-app:latest
                         docker push ${ECR_REPO}:${IMAGE_TAG}
-                    """
+                
+			""" 
                 }
             }
         }
