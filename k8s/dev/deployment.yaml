@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: sample-spring-boot-app
-        image: YOUR_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/sample-spring-boot-app:latest
+        image: 098072157119.dkr.ecr.ap-south-1.amazonaws.com/sample-spring-boot-app
         ports:
         - containerPort: 8080
         resources:
