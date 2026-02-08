@@ -1,0 +1,73 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'                    // ← CHANGE
+        AWS_ACCOUNT = '123456789012'                // ← CHANGE to your AWS account ID
+        ECR_REPO = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/sample-spring-boot-app"
+        IMAGE_TAG = 'latest'
+        K8S_NAMESPACE = 'dev'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                dir('app/sample-spring-boot-app') {
+                    sh 'mvn clean compile'
+                }
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                dir('app/sample-spring-boot-app') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -f docker/Dockerfile -t ${ECR_REPO}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Push to AWS ECR') {
+            steps {
+                script {
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} | \
+                        docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        
+                        docker push ${ECR_REPO}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Dev Kubernetes') {
+            steps {
+                sh """
+                    kubectl apply -f k8s/dev/deployment.yaml
+                    kubectl apply -f k8s/dev/service.yaml
+                    kubectl rollout status deployment/sample-spring-boot-app -n ${K8S_NAMESPACE} --timeout=120s
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline completed successfully! Image pushed to ECR and deployed to Dev."
+        }
+        failure {
+            echo "❌ Pipeline failed."
+        }
+    }
+}
