@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'                    // ← CHANGE
-        AWS_ACCOUNT = '123456789012'                // ← CHANGE to your AWS account ID
+        AWS_REGION = 'ap-south-1'
+        AWS_ACCOUNT = '098072157119'
         ECR_REPO = "${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/sample-spring-boot-app"
         IMAGE_TAG = 'latest'
         K8S_NAMESPACE = 'dev'
@@ -44,7 +44,7 @@ pipeline {
                     sh """
                         aws ecr get-login-password --region ${AWS_REGION} | \
                         docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        
+                        docker tag sample-spring-boot-app:latest 098072157119.dkr.ecr.ap-south-1.amazonaws.com/sample-spring-boot-app:latest
                         docker push ${ECR_REPO}:${IMAGE_TAG}
                     """
                 }
