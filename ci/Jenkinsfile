@@ -19,7 +19,7 @@ pipeline {
         stage('Maven Build') {
             steps {
                 dir('app/sample-spring-boot-app') {
-                    sh 'mvn clean compile'
+                    sh './mvnw clean compile'
                 }
             }
         }
@@ -27,7 +27,7 @@ pipeline {
         stage('Run Unit Tests') {
             steps {
                 dir('app/sample-spring-boot-app') {
-                    sh 'mvn test'
+                    sh './mvnw test'
                 }
             }
         }
