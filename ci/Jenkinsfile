@@ -58,6 +58,12 @@ pipeline {
         stage('Deploy to Dev Kubernetes') {
             steps {
                 sh """
+		    kubectl create secret docker-registry ecr-secret \
+	              --docker-server=${ECR_REPO} \
+        	      --docker-username=AWS \
+	              --docker-password=\$(aws ecr get-login-password --region ${AWS_REGION}) \
+	              -n ${K8S_NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+		
                     kubectl apply -f k8s/dev/deployment.yaml
                     kubectl apply -f k8s/dev/service.yaml
                     kubectl rollout status deployment/sample-spring-boot-app -n ${K8S_NAMESPACE} --timeout=120s
