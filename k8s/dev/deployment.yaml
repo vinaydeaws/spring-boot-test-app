@@ -13,6 +13,9 @@ spec:
       labels:
         app: sample-spring-boot-app
     spec:
+      # imagePullSecrets is at the Pod Spec level (same level as containers)
+      imagePullSecrets:
+      - name: ecr-secret
       containers:
       - name: sample-spring-boot-app
         image: 098072157119.dkr.ecr.ap-south-1.amazonaws.com/sample-spring-boot-app
@@ -22,6 +25,19 @@ spec:
           requests:
             memory: "512Mi"
             cpu: "250m"
-
-      imagePullSecrets:
-      - name: ecr-secret
+          limits: # Good practice to include limits for stability
+            memory: "1Gi"
+            cpu: "500m"
+        # Probes must be indented INSIDE the specific container block
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 30 # Give Spring Boot time to start
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
