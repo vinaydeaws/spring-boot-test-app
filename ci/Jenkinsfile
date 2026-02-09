@@ -49,7 +49,7 @@ pipeline {
                         docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         docker tag sample-spring-boot-app:latest 098072157119.dkr.ecr.ap-south-1.amazonaws.com/sample-spring-boot-app:latest
                         docker push ${ECR_REPO}:${IMAGE_TAG}
-                
+               		docker system prune -af 
 			""" 
                 }
             }
