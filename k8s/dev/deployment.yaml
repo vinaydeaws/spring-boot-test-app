@@ -29,6 +29,12 @@ spec:
             memory: "1Gi"
             cpu: "500m"
         # Probes must be indented INSIDE the specific container block
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          failureThreshold: 30
+          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
